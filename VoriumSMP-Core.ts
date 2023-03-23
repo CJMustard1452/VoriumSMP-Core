@@ -12,7 +12,6 @@ events.command.on((command, player, commandContext)=>{
     return 0;
 });
 
-
 function allianceCommand(command: string, player: string, commandContext: CommandContext){
     switch(command.split(' ')[1]){
         default:
@@ -36,8 +35,5 @@ function allianceCommand(command: string, player: string, commandContext: Comman
         case 'kick':
             //Remove Player
             break;
-
     }
 }
-
-
