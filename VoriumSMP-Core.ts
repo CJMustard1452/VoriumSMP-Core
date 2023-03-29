@@ -5,5 +5,3 @@ import { playerJoin } from "./src/EventManagers/playerJoin";
 events.serverOpen.on(() => {
     openServer.init();
 });
-
-//test
