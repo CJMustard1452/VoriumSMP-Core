@@ -14,6 +14,7 @@ export class allianceCreate{
         allianceData['players'][player.getName()]['alliance'] = commandContext.command.slice(17);
         allianceData['alliances'][commandContext.command.slice(17)] = {};
         allianceData['alliances'][commandContext.command.slice(17)]['founder'] = player.getName();
+        allianceData['alliances'][commandContext.command.slice(17)]['invites'] = false;
         allianceData['alliances'][commandContext.command.slice(17)]['members'] = false;
         writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', JSON.stringify(allianceData), 'utf-8');
     }
