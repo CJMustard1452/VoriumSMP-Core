@@ -9,7 +9,7 @@ export class playerJoin {
     }
 
     private registerPlayer(player: Player): void {
-        player.sendMessage('§8(§3Vorium-SMP§8) §aWelcome, we are currently setting up player data associated with this account.');
+        player.sendMessage('§8(§3Vorium-SMP§8) §aWelcome, we are currently setting up player data associated with this account, to get started run §c/alliance§a.');
         this.allianceData['players'][`${player.getName()}`] = {};
         this.allianceData['players'][`${player.getName()}`]["alliance"] = false;
         this.allianceData['players'][`${player.getName()}`]["invites"] = false;
