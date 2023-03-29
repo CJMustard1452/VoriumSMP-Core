@@ -4,7 +4,7 @@ import { writeFileSync } from "fs";
 
 export class allianceDisband{
 
-    public static init(commandContext: CommandContext, allianceData: any) {
+    public static init(commandContext: CommandContext, allianceData: any): void {
         const player = commandContext.origin.getEntity();
         if(!player?.isPlayer()) return;
         if(!allianceData['players'][player.getName()]['alliance']) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou are not in an alliance.');
@@ -14,7 +14,7 @@ export class allianceDisband{
             allianceData['players'][member]['alliance'] = false;
         });
         if(allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['invites']) allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['invites'].forEach( function (member:any){
-            allianceData['players'][member]['invites'][allianceData['players'][player.getName()]['alliance']] = false;
+            allianceData['players'][member]['invites'].splice(allianceData['players'][member]['invites'].indexOf(allianceData['players'][player.getName()]['alliance']), 1);
         });
         delete allianceData['alliances'][allianceData['players'][player.getName()]['alliance']];
         allianceData['players'][player.getName()]['alliance'] = false;
