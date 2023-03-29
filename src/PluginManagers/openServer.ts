@@ -1,5 +1,6 @@
 import { mkdirSync, openSync, writeFileSync, existsSync } from 'fs'
 import { command } from "bdsx/command";
+
 export class openServer {
     
     public static init(): void {
