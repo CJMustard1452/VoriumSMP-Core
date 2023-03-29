@@ -13,7 +13,10 @@ export class allianceDisband{
         if(allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['members']) allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['members'].forEach( function (member:any){
             allianceData['players'][member]['alliance'] = false;
         });
-        allianceData['alliances'][allianceData['players'][player.getName()]['alliance']] = false;
+        if(allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['invites']) allianceData['alliances'][allianceData['players'][player.getName()]['alliance']]['invites'].forEach( function (member:any){
+            allianceData['players'][member]['invites'][allianceData['players'][player.getName()]['alliance']] = false;
+        });
+        delete allianceData['alliances'][allianceData['players'][player.getName()]['alliance']];
         allianceData['players'][player.getName()]['alliance'] = false;
         writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', JSON.stringify(allianceData), 'utf-8');
     }
