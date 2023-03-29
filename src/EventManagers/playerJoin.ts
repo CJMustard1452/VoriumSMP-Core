@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { Player } from 'bdsx/bds/player';
+
 export class playerJoin {
 
     allianceData = JSON.parse(readFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', 'utf-8'));
