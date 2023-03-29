@@ -5,3 +5,7 @@ import { playerJoin } from "./src/EventManagers/playerJoin";
 events.serverOpen.on(() => {
     openServer.init();
 });
+
+events.playerJoin.on(event => {
+    new playerJoin(event.player);
+})
