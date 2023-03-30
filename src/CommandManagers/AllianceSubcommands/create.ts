@@ -1,12 +1,11 @@
 import { CommandContext } from "bdsx/bds/command";
+import { Player } from "bdsx/bds/player";
 import { bedrockServer } from "bdsx/launcher";
 import { writeFileSync } from "fs";
 
 export class allianceCreate{
 
-    public static init(commandContext: CommandContext, allianceData: any) {
-        const player = commandContext.origin.getEntity();
-        if(!player?.isPlayer()) return;
+    public static init(player: Player, commandContext: CommandContext, allianceData: any): void {
         if(allianceData['players'][player.getName()]['alliance'] !== false) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou are already in an alliance.');
         if(!commandContext.command.split(' ')[2]) return player.sendMessage('§8(§3Vorium-SMP§8) §cPlease enter an alliance name.');
         if(allianceData['alliances'][commandContext.command.slice(17)] == true) return player.sendMessage('§8(§3Vorium-SMP§8) §cThis alliance already exists.');
