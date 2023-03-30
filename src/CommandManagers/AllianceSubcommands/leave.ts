@@ -1,8 +1,9 @@
 import { CommandContext } from "bdsx/bds/command";
+import { Player } from "bdsx/bds/player";
 
 export class allianceLeave{
 
-    public static init(commandContext: CommandContext, allianceData: any) {
+    public static init(player: Player, commandContext: CommandContext, allianceData: any): void {
 
     }
 }
