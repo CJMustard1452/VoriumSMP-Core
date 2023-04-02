@@ -21,7 +21,7 @@ export default class AllianceModule {
     }
 
     public static exists(name: string) {
-        return allianceData.findIndex(a => a.name === name);
+        return allianceData.find(a => a.name === name);
     }
 
     public static get(name: string): AllianceData | undefined {

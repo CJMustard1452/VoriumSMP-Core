@@ -1,11 +1,3 @@
-import { allianceUninvite } from "./sub/uninivte";
-import { allianceDisband } from "./sub/disband";
-import { allianceInvite } from "./sub/invite";
-import { allianceRemove } from "./sub/remove";
-import { allianceAccept } from "./sub/accept";
-import { allianceLeave } from "./sub/leave";
-import { allianceInfo } from "./sub/info";
-import { CommandContext } from "bdsx/bds/command";
 import {readFileSync} from 'fs'
 import { command } from "bdsx/command";
 import { CxxString } from "bdsx/nativetype";

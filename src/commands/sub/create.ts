@@ -3,22 +3,28 @@ import { bedrockServer } from "bdsx/launcher";
 import AllianceModule from "../../lib/AllianceModule";
 import User from "../../lib/User";
 import { broadcast } from "../../lib/Util";
+import { Messages } from "../../lib/Messages";
 
 const create = (user: User, params: Record<string, any>) => {
     if (AllianceModule.ownsAlliance(user.name)) {
-        return // do message
+        user.message(Messages.ownAlliance)
+        return
     }
     if(!params.name) {
-        return // do message
+        user.message(Messages.noName);
+        return
+    }
+    if(params.length < 3 || params.length > 15) {
+        user.message(Messages.invalidName);
+        return
     }
     if (AllianceModule.exists(user.name)) {
-        return // do message
+        user.message(Messages.exists);
+        return
     }
 
-    broadcast("do message")
-
-
-    AllianceModule.create(params.name, user.name)
+    AllianceModule.addMember(params.name, user.name)
+    broadcast(Messages.newAlliance(params.name))
 }
 
 export default create;

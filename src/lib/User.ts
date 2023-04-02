@@ -4,6 +4,8 @@ import AllianceData from "./type/AllianceData";
 export default class User {
     #player: ServerPlayer;
 
+    invite: string;
+
     public constructor(player: ServerPlayer) {
         this.#player = player;
     }
@@ -14,5 +16,9 @@ export default class User {
 
     public get xuid(): string {
         return this.#player.getXuid();
+    }
+
+    public message(msg: string): void {
+        this.#player.sendMessage(msg)
     }
 }
