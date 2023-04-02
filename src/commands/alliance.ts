@@ -37,4 +37,5 @@ command.register("alliance", "Access to alliance sub-commands.")
     }, { option: command.enum("option.leave", "leave") })
     .overload(param => {
 
-    }, { option: command.enum("option.disband", "disband") });
+    }, { option: command.enum("option.disband", "disband") })
+    .alias("al");
