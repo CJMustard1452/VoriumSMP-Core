@@ -2,7 +2,7 @@
     "name": "@bdsx/VoriumSMP-Core",
     "version": "0.0.1",
     "description": "SMP Core for VoriumSMP",
-    "main": "VoriumSMP-Core.js",
+    "main": "core.js",
     "keywords": [],
     "author": "CJMustard1452",
     "license": "ISC",

@@ -1,0 +1,93 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = require("fs");
+const core_1 = require("../../core");
+const Util_1 = require("./Util");
+class AllianceModule {
+    static create(name, leader) {
+        core_1.allianceData.push({
+            name,
+            leader,
+            members: [],
+        });
+        this.writeDB();
+    }
+    static delete(name) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        delete core_1.allianceData[idx];
+        this.writeDB();
+    }
+    static exists(name) {
+        return core_1.allianceData.findIndex(a => a.name === name);
+    }
+    static get(name) {
+        return core_1.allianceData.find(a => a.name === name);
+    }
+    static getByLeader(name) {
+        return core_1.allianceData.find(a => a.leader === name);
+    }
+    static addMember(name, member) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        core_1.allianceData[idx].members.push(member);
+        this.writeDB();
+    }
+    static removeMember(name, member) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        core_1.allianceData[idx].members = core_1.allianceData[idx].members.filter(n => n !== member);
+        this.writeDB();
+    }
+    static setHome(name, home) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        core_1.allianceData[idx].home = home;
+        this.writeDB();
+    }
+    static ownsAlliance(member) {
+        return !!core_1.allianceData.find(a => a.leader === member);
+    }
+    static isLeader(name, member) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        return core_1.allianceData[idx].leader === member;
+    }
+    static isMember(name, member) {
+        const idx = core_1.allianceData.findIndex(a => a.name === name);
+        return core_1.allianceData[idx].members.includes(member);
+    }
+    static insideClaim(vec) {
+        let a = core_1.allianceData.filter((data) => {
+            return (0, Util_1.inBetween)(vec, data.claim);
+        });
+        if (a.length) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    static intersectsClaim(area) {
+        let a = core_1.allianceData.filter((data) => {
+            if (!data.claim) {
+                return (0, Util_1.intersects)(area, data.claim);
+            }
+        });
+        if (a.length) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    static insideWhichClaim(vec) {
+        return core_1.allianceData.find((data) => {
+            return (0, Util_1.inBetween)(vec, data.claim);
+        });
+    }
+    static getDB() {
+        const data = (0, fs_1.readFileSync)(core_1.alliancePath).toString();
+        return JSON.parse(data);
+    }
+    static writeDB() {
+        (0, fs_1.writeFileSync)(core_1.alliancePath, JSON.stringify(core_1.allianceData, null, 4));
+    }
+}
+exports.default = AllianceModule;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWxsaWFuY2VNb2R1bGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJBbGxpYW5jZU1vZHVsZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLDJCQUFpRDtBQUVqRCxxQ0FBd0Q7QUFFeEQsaUNBQStDO0FBRS9DLE1BQXFCLGNBQWM7SUFDeEIsTUFBTSxDQUFDLE1BQU0sQ0FBQyxJQUFZLEVBQUUsTUFBYztRQUM3QyxtQkFBWSxDQUFDLElBQUksQ0FBQztZQUNkLElBQUk7WUFDSixNQUFNO1lBQ04sT0FBTyxFQUFFLEVBQUU7U0FDZCxDQUFDLENBQUE7UUFDRixJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7SUFDbkIsQ0FBQztJQUVNLE1BQU0sQ0FBQyxNQUFNLENBQUMsSUFBWTtRQUM3QixNQUFNLEdBQUcsR0FBRyxtQkFBWSxDQUFDLFNBQVMsQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxJQUFJLEtBQUssSUFBSSxDQUFDLENBQUM7UUFDekQsT0FBTyxtQkFBWSxDQUFDLEdBQUcsQ0FBQyxDQUFDO1FBQ3pCLElBQUksQ0FBQyxPQUFPLEVBQUUsQ0FBQztJQUNuQixDQUFDO0lBRU0sTUFBTSxDQUFDLE1BQU0sQ0FBQyxJQUFZO1FBQzdCLE9BQU8sbUJBQVksQ0FBQyxTQUFTLENBQUMsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUMsSUFBSSxLQUFLLElBQUksQ0FBQyxDQUFDO0lBQ3hELENBQUM7SUFFTSxNQUFNLENBQUMsR0FBRyxDQUFDLElBQVk7UUFDMUIsT0FBTyxtQkFBWSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxJQUFJLEtBQUssSUFBSSxDQUFDLENBQUM7SUFDbkQsQ0FBQztJQUVNLE1BQU0sQ0FBQyxXQUFXLENBQUMsSUFBWTtRQUNsQyxPQUFPLG1CQUFZLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDLE1BQU0sS0FBSyxJQUFJ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
