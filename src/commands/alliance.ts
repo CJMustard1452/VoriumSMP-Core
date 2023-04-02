@@ -38,4 +38,4 @@ command.register("alliance", "Access to alliance sub-commands.")
     .overload(param => {
 
     }, { option: command.enum("option.disband", "disband") })
-    .alias("al");
+    .alias("al",).alias("ally");
