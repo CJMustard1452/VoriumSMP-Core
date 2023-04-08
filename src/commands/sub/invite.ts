@@ -1,20 +1,45 @@
-import { CommandContext } from "bdsx/bds/command";
+import { CommandContext, CommandSelector } from "bdsx/bds/command";
 import { bedrockServer } from "bdsx/launcher";
 import { Player } from "bdsx/bds/player";
 import { writeFileSync } from "fs";
+import AllianceModule from "../../lib/AllianceModule";
+import { Messages } from "../../lib/Messages";
+import User from "../../lib/User";
+import { broadcast } from "../../lib/Util";
+import { getUser } from "../../../core";
 
-export class allianceInvite {
-
-    public static init(player: Player, commandContext: CommandContext, allianceData: any): void {
-        if(!allianceData['players'][player.getName().toLowerCase()]['alliance']) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou are not in an alliance.');
-        if(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['founder'] !== player.getName().toLowerCase()) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou do not own this alliance.');
-        if(!commandContext.command.split(' ')[2]) return player.sendMessage('§8(§3Vorium-SMP§8) §cPlease specify a player to invite.');
-        if(commandContext.command.split(' ')[2].toLowerCase() == player.getName().toLowerCase()) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou can not invite yourself.');
-        if(!allianceData['players'][commandContext.command.split(' ')[2].toLowerCase()]) return player.sendMessage('§8(§3Vorium-SMP§8) §cThat player does not exist.');
-        if(allianceData['players'][commandContext.command.split(' ')[2].toLowerCase()]['invites'].includes(allianceData['players'][player.getName().toLowerCase()]['alliance'])) return player.sendMessage('§8(§3Vorium-SMP§8) §cThat player has already been invited.');
-        bedrockServer.serverInstance.getPlayers().forEach(p => p.sendMessage(`§8(§3Vorium-SMP§8) §c${commandContext.command.split(' ')[2]} §ahas just been invited to §c${allianceData['players'][player.getName().toLowerCase()]['alliance']}§a.`));
-        allianceData["players"][commandContext.command.split(' ')[2].toLowerCase()]['invites'].push(allianceData['players'][player.getName().toLowerCase()]['alliance'].toLowerCase);
-        allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['invites'].push(commandContext.command.split(' ')[2].toLowerCase());
-        writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', JSON.stringify(allianceData), 'utf-8');
+const invite = (user: User, params: Record<string, any>) => {
+    if (!AllianceModule.ownsAlliance(user.name)) {
+        user.message(Messages.noOwnAlliance)
+        return
     }
+    const all = AllianceModule.getByLeader(user.name)!
+    if (!all) {
+        user.message(Messages.noOwnAlliance)
+        return
+    }
+    if (!params.player) {
+        user.message(Messages.invalidArgument);
+        return;
+    }
+    const name = (params.player as CommandSelector<Player>).getName();
+    if (name === user.name) {
+        user.message(Messages.inviteSelf)
+        return;
+    }
+    if (all.members.includes(name)) {
+        user.message(Messages.memberPartOfAlliance)
+        return
+    }
+
+    const targetUser = getUser(name)!;
+    if(targetUser.invite) {
+        user.message(Messages.memberHasInvite);
+        return;
+    }
+
+    targetUser.invite = all.name;
+    broadcast(Messages.invitedMember(targetUser.invite, targetUser.name))
 }
+
+export default invite;

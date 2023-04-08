@@ -14,7 +14,7 @@ const create = (user: User, params: Record<string, any>) => {
         user.message(Messages.noName);
         return
     }
-    if(params.length < 3 || params.length > 15) {
+    if(params.name.length < 3 || params.name.length > 15) {
         user.message(Messages.invalidName);
         return
     }
@@ -23,7 +23,7 @@ const create = (user: User, params: Record<string, any>) => {
         return
     }
 
-    AllianceModule.addMember(params.name, user.name)
+    AllianceModule.create(params.name, user.name)
     broadcast(Messages.newAlliance(params.name))
 }
 

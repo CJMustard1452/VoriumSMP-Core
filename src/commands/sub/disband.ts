@@ -1,22 +1,23 @@
-import { CommandContext } from "bdsx/bds/command";
+import { CommandContext, CommandSelector } from "bdsx/bds/command";
 import { bedrockServer } from "bdsx/launcher";
 import { Player } from "bdsx/bds/player";
 import { writeFileSync } from "fs";
+import { getUser } from "../../../core";
+import AllianceModule from "../../lib/AllianceModule";
+import { Messages } from "../../lib/Messages";
+import User from "../../lib/User";
+import { broadcast } from "../../lib/Util";
 
-export class allianceDisband {
 
-    public static init(player: Player, allianceData: any): void {
-        if(!allianceData['players'][player.getName().toLowerCase()]['alliance']) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou are not in an alliance.');
-        if(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['founder'] !== player.getName().toLowerCase()) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou do not own this alliance.');
-        bedrockServer.serverInstance.getPlayers().forEach(p => p.sendMessage(`§8(§3Vorium-SMP§8) §c${player.getName()} §ahas just disbanded §c${allianceData['players'][player.getName().toLowerCase()]['alliance']}§a.`));
-        if(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['members']) allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['members'].forEach( function (member:any){
-            allianceData['players'][member.toLowerCase()]['alliance'] = false;
-        });
-        if(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['invites']) allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['invites'].forEach( function (member:any){
-            allianceData['players'][member.toLowerCase()]['invites'].splice(allianceData['players'][member.toLowerCase()]['invites'].indexOf(allianceData['players'][player.getName().toLowerCase()]['alliance']), 1);
-        });
-        delete allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']];
-        allianceData['players'][player.getName().toLowerCase()]['alliance'] = false;
-        writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', JSON.stringify(allianceData), 'utf-8');
+const disband = (user: User, params: Record<string, any>) => {
+    if (!AllianceModule.ownsAlliance(user.name)) {
+        user.message(Messages.noOwnAlliance)
+        return
     }
+    const all = AllianceModule.getByLeader(user.name)!;
+    AllianceModule.delete(all.name);
+
+    broadcast(Messages.deletedAlliance(all.name))
 }
+
+export default disband;

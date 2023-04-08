@@ -4,30 +4,47 @@ import { CxxString } from "bdsx/nativetype";
 import create from "./sub/create";
 import { ServerPlayer } from "bdsx/bds/player";
 import User from "../lib/User";
+import { PlayerCommandSelector } from 'bdsx/bds/command';
+import { getUser } from '../../core';
+import invite from './sub/invite';
+import remove from './sub/remove';
+import accept from './sub/accept';
+import who from './sub/who';
+import disband from './sub/disband';
+import leave from './sub/leave';
+import claim from './sub/claim';
 
 command.register("alliance", "Access to alliance sub-commands.")
     .overload((params, origin) => {
-        create(new User(origin.getEntity() as ServerPlayer), params)
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        create(user, params)
     }, { option: command.enum("option.create", "create"), name: CxxString })
-    .overload(param => {
-
-    }, { option: command.enum("option.invite", "invite"), player: CxxString })
-    .overload(param => {
-
-    }, { option: command.enum("option.remove", "remove"), player: CxxString })
-    .overload(param => {
-
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        invite(user, params)
+    }, { option: command.enum("option.invite", "invite"), player: [PlayerCommandSelector, false] })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        remove(user, params)
+    }, { option: command.enum("option.remove", "remove"), player: [PlayerCommandSelector, false] })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        accept(user, params)
     }, { option: command.enum("option.accept", "accept"), name: CxxString })
-    .overload(param => {
-
-    }, { option: command.enum("option.uninvite", "uninvite"), player: CxxString })
-    .overload(param => {
-
-    }, { option: command.enum("option.info", "info") })
-    .overload(param => {
-
-    }, { option: command.enum("option.leave", "leave") })
-    .overload(param => {
-
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        who(user, params)
+    }, { option: command.enum("option.who", "who"), name: CxxString  })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        leave(user, params)
+    }, { option: command.enum("option.leave", "leave"), name: CxxString })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        disband(user, params)
     }, { option: command.enum("option.disband", "disband") })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        claim(user, params)
+    }, { option: command.enum("option.claim", "claim"), claimOption: command.enum("claimOption", "start", "complete") })
     .alias("al",).alias("ally");

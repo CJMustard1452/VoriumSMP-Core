@@ -2,15 +2,30 @@ import { CommandContext } from "bdsx/bds/command";
 import { bedrockServer } from "bdsx/launcher";
 import { Player } from "bdsx/bds/player";
 import { writeFileSync } from "fs";
+import AllianceModule from "../../lib/AllianceModule";
+import { Messages } from "../../lib/Messages";
+import User from "../../lib/User";
+import { broadcast } from "../../lib/Util";
 
-export class allianceLeave {
-
-    public static init(player: Player, allianceData: any): void {
-        if(!allianceData['players'][player.getName().toLowerCase()]['alliance']) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou are not in an alliance.');
-        if(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['founder'] == player.getName().toLowerCase()) return player.sendMessage('§8(§3Vorium-SMP§8) §cYou can not leave your own alliance, Use /alliance disband to disband your alliance.');
-        bedrockServer.serverInstance.getPlayers().forEach(p => p.sendMessage(`§8(§3Vorium-SMP§8) §c${player.getName()} §ahas just left §c${allianceData['players'][player.getName().toLowerCase()]['alliance']}§a.`));
-        allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['members'].splice(allianceData['alliances'][allianceData['players'][player.getName().toLowerCase()]['alliance']]['members'].indexOf(player.getName().toLowerCase()), 1);
-        allianceData['players'][player.getName().toLowerCase()]['alliance'] = false;
-        writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', JSON.stringify(allianceData), 'utf-8');
+const leave = (user: User, params: Record<string, any>) => {
+    if (AllianceModule.ownsAlliance(user.name)) {
+        user.message(Messages.ownAllianceLeave)
+        return
     }
+
+    const all = AllianceModule.get(params.name);
+    if (!all) {
+        user.message(Messages.invalidAlliance);
+        return;
+    }
+
+    if (!all.members.includes(user.name)) {
+        user.message(Messages.notPartOfAlliance);
+        return;
+    }
+
+    AllianceModule.removeMember(all.name, user.name);
+    broadcast(Messages.leftMember(all.name, user.name))
 }
+
+export default leave;
