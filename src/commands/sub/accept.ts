@@ -7,12 +7,10 @@ import AllianceModule from "../../lib/AllianceModule";
 import User from "../../lib/User";
 import { broadcast } from "../../lib/Util";
 import { Messages } from "../../lib/Messages";
+import { cache } from "../alliance";
+
 
 const accept = (user: User, params: Record<string, any>) => {
-    if (!user.invite.length) {
-        user.message(Messages.noInviteAny)
-        return;
-    }
     if (AllianceModule.ownsAlliance(user.name)) {
         user.message(Messages.ownAlliance)
         return
@@ -21,8 +19,19 @@ const accept = (user: User, params: Record<string, any>) => {
         user.message(Messages.noName);
         return
     }
+    if(!cache[params.name]) {
+        user.message(Messages.noInviteAlliance)
+        return;
+    }
+
+    if(!cache[params.name].includes(user.name)) {
+        user.message(Messages.noInviteAlliance);
+        return;
+    }
+
+    cache[params.name] = cache[params.name].filter(d => d !== user.name);
+    AllianceModule.addMember(params.name, user.name);
     broadcast(Messages.newMember(user.invite, user.name))
-    user.invite = ""
 }
 
 export default accept;

@@ -7,6 +7,7 @@ import { Messages } from "../../lib/Messages";
 import User from "../../lib/User";
 import { broadcast } from "../../lib/Util";
 import { getUser } from "../../../core";
+import { cache } from "../alliance";
 
 const invite = (user: User, params: Record<string, any>) => {
     if (!AllianceModule.ownsAlliance(user.name)) {
@@ -32,14 +33,13 @@ const invite = (user: User, params: Record<string, any>) => {
         return
     }
 
-    const targetUser = getUser(name)!;
-    if(targetUser.invite) {
-        user.message(Messages.memberHasInvite);
-        return;
+    if (cache[all.name]) {
+        cache[all.name].push(name);
+    } else {
+        cache[all.name] = [name]
     }
 
-    targetUser.invite = all.name;
-    broadcast(Messages.invitedMember(targetUser.invite, targetUser.name))
+    broadcast(Messages.invitedMember(all.name, name))
 }
 
 export default invite;

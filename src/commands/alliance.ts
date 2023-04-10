@@ -14,7 +14,9 @@ import disband from './sub/disband';
 import leave from './sub/leave';
 import claim from './sub/claim';
 
-command.register("alliance", "Access to alliance sub-commands.")
+export const cache: { [name: string]: string[] } = {}
+
+command.register("alliance", "§cAccess to alliance sub-commands.")
     .overload((params, origin) => {
         const user = new User((origin.getEntity() as ServerPlayer))!
         create(user, params)
@@ -47,4 +49,3 @@ command.register("alliance", "Access to alliance sub-commands.")
         const user = new User((origin.getEntity() as ServerPlayer))!
         claim(user, params)
     }, { option: command.enum("option.claim", "claim"), claimOption: command.enum("claimOption", "start", "complete") })
-    .alias("al",).alias("ally");

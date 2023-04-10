@@ -1,5 +1,5 @@
 {
-    "name": "@bdsx/VoriumSMP-Core",
+    "name": "@bdsx/smp",
     "version": "0.0.1",
     "description": "SMP Core for VoriumSMP",
     "main": "core.js",

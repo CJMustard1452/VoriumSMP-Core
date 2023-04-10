@@ -8,6 +8,9 @@ import playerLeft from "./src/events/playerLeft";
 import AllianceModule from "./src/lib/AllianceModule";
 import { CANCEL } from "bdsx/common";
 import { Messages } from "./src/lib/Messages";
+import { ContainerClosePacket } from "bdsx/bds/packets";
+import { MinecraftPacketIds } from "bdsx/bds/packetids";
+import { RawPacket } from "bdsx/rawpacket";
 
 let users: User[] = []
 
@@ -24,16 +27,26 @@ export const removeUser = (name: string) => {
 }
 
 export const alliancePath = '../plugin_data/VoriumSMP-Core/alliancedata.json'
+export const warpPath = '../plugin_data/VoriumSMP-Core/warpdata.json';
 export const allianceData: AllianceData[] = JSON.parse(readFileSync(alliancePath, 'utf-8'));
 
 events.serverOpen.on(async() => {
     await import("./src/commands/alliance");
+    await import("./src/commands/tpa");
+    await import("./src/commands/warp");
     console.log('VoriumSMP-Core has been enabled.');
-    if (!existsSync('../plugin_data/VoriumSMP-Core/alliancedata.json')) {
+    if (!existsSync(alliancePath)) {
         if(!existsSync('../plugin_data')) mkdirSync('../plugin_data');
         if(!existsSync('../plugin_data/VoriumSMP-Core')) mkdirSync('../plugin_data/VoriumSMP-Core');
-        if(!existsSync('../plugin_data/VoriumSMP-Core/alliancedata.json')) openSync('../plugin_data/VoriumSMP-Core/alliancedata.json', 'w');
-        writeFileSync('../plugin_data/VoriumSMP-Core/alliancedata.json', '[]');
+        if(!existsSync(alliancePath)) openSync(alliancePath, 'w');
+        writeFileSync(alliancePath, '[]');
+    }
+
+    if (!existsSync(warpPath)) {
+        if(!existsSync('../plugin_data')) mkdirSync('../plugin_data');
+        if(!existsSync('../plugin_data/VoriumSMP-Core')) mkdirSync('../plugin_data/VoriumSMP-Core');
+        if(!existsSync(warpPath)) openSync(warpPath, 'w');
+        writeFileSync(warpPath, '{}');
     }
 });
 
@@ -75,7 +88,7 @@ events.playerInteract.on(ev => {
 
 events.itemUse.on(ev => {
     if(!AllianceModule.allowed(ev.player)) {
-        if(!ev.itemStack.isPotionItem()) {
+        if(!ev.itemStack.isPotionItem() || ev.itemStack.getItem()?.isFood()) {
             ev.player.sendMessage(Messages.notAllowedAlliance)
             return CANCEL;
         }
