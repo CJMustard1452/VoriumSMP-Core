@@ -22,6 +22,10 @@ command.register("warp", "§3Access to warp sub-commands.")
             user.message("§4That warp does not exist.");
             return;
         }
+        if (w.dimension === user.player.getDimensionId()) {
+            user.message("§4Must be in same dimension as warp");
+            return;
+        }
         WarpModule.teleport(user.name, w.name);
     }, { option: command.enum("option.to", "to"), name: CxxString })
     .overload((params, origin) => {
