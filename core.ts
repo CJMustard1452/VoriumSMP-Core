@@ -12,6 +12,7 @@ import { CANCEL } from "bdsx/common";
 import { Messages } from "./src/lib/Messages";
 import { Packet } from "bdsx/bds/packet";
 import { ActorType } from "bdsx/bds/actor";
+import {Webhook} from "discord-webhook-node"
 
 let users: User[] = []
 
@@ -26,6 +27,8 @@ export const addUser = (player: Player) => {
 export const removeUser = (name: string) => {
     users = users.filter(u => u.name !== name);
 }
+
+export const logs = new Webhook("https://canary.discord.com/api/webhooks/1094961698026307656/MyTuIOKRtBtA5_x2X_Xt0tXKEx5UQK-d2rRyTxGRUsh6hSau_4lj8fgkZ-9k0UNHFmOM")
 
 export const alliancePath = '../plugin_data/VoriumSMP-Core/alliancedata.json'
 export const warpPath = '../plugin_data/VoriumSMP-Core/warpdata.json';
@@ -79,6 +82,7 @@ events.blockPlace.on(ev => {
         ev.player.sendMessage(Messages.notAllowedAlliance)
         return CANCEL;
     }
+    logs.send(`${ev.player.getName()} placed a block ${ev.block.getName()} at \`${ev.blockPos.x}, ${ev.blockPos.y}, ${ev.blockPos.z}\``)
 });
 
 events.blockDestroy.on(ev => {
@@ -86,6 +90,7 @@ events.blockDestroy.on(ev => {
         ev.player.sendMessage(Messages.notAllowedAlliance)
         return CANCEL;
     }
+    logs.send(`${ev.player.getName()} broke a block ${ev.itemStack.getName()} at \`${ev.blockPos.x}, ${ev.blockPos.y}, ${ev.blockPos.z}\``)
 });
 
 events.playerInteract.on(ev => {
@@ -93,6 +98,8 @@ events.playerInteract.on(ev => {
         ev.player.sendMessage(Messages.notAllowedAlliance)
         return CANCEL;
     }
+    logs.send(`${ev.player.getName()} interacted (Victim: ${ev.victim.getNameTag()}) at \`${ev.interactPos.x}, ${ev.interactPos.y}, ${ev.interactPos.z}\``)
+
 });
 
 const safeMobs = [
@@ -126,15 +133,19 @@ events.itemUse.on(ev => {
             return CANCEL;
         }
     }
+    logs.send(`${ev.player.getName()} used item ${ev.itemStack.getName()} at \`${ev.player.getPosition().x}, ${ev.player.getPosition().y}, ${ev.player.getPosition().z}\``)
+
 });
 
 events.itemUseOnBlock.on(ev => {
     if (ev.actor instanceof Player) {
+        logs.send(`${ev.actor.getName()} used item ${ev.itemStack.getName()} at \`${ev.actor.getPosition().x}, ${ev.actor.getPosition().y}, ${ev.actor.getPosition().z}\``)
         if(!AllianceModule.allowed(ev.actor)) {
             ev.actor.sendMessage(Messages.notAllowedAlliance)
             return CANCEL;
         }
     }
+
 });
 
 events.splashPotionHit.on(ev => {
