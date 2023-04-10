@@ -20,7 +20,7 @@ export default class AllianceModule {
         const data = this.getDB();
         const idx = data.findIndex(a => a.name === name);
         delete data[idx];
-        this.writeDB(data);
+        this.writeDB(data.filter(n => n));
     }
 
     public static exists(name: string) {
@@ -33,6 +33,10 @@ export default class AllianceModule {
 
     public static getByLeader(name: string): AllianceData | undefined {
         return this.getDB().find(a => a.leader === name);
+    }
+
+    public static getByMember(name: string): AllianceData | undefined {
+        return this.getDB().find(a => a.members.includes(name));
     }
 
     public static addMember(name: string, member: string) {
@@ -126,7 +130,7 @@ export default class AllianceModule {
 
     public static allowed(player: Player): boolean {
         for (let data of this.getDB()) {
-            if(data.claim) {
+            if(data['claim'] !== undefined) {
                 if (inBetween(player.getPosition(), data.claim)) {
                     return data.leader === player.getName() || data.members.includes(player.getName());
                 } else {

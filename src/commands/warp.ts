@@ -67,6 +67,6 @@ command.register("warp", "§3Access to warp sub-commands.")
                     dim = "§6The End";
                     break;
             }
-            return `§3${w.name}§7: (${Math.round(w.coords.x)}, ${Math.round(w.coords.y)}, ${Math.round(w.coords.z)}) | ${dim} §\n`
+            return `§3${w.name}§7: (${Math.round(w.coords.x)}, ${Math.round(w.coords.y)}, ${Math.round(w.coords.z)}) | ${dim}`
         })}\n`)
     }, { option: command.enum("option.list", "list") })

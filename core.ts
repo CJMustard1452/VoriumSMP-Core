@@ -3,14 +3,15 @@ import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "fs
 import AllianceData from "./src/lib/type/AllianceData";
 import playerJoin from "./src/events/playerJoin";
 import User from "./src/lib/User";
-import { Player } from "bdsx/bds/player";
+import { RawPacket } from "bdsx/rawpacket";
+import { MinecraftPacketIds } from "bdsx/bds/packetids";
+import { Player, ServerPlayer } from "bdsx/bds/player";
 import playerLeft from "./src/events/playerLeft";
 import AllianceModule from "./src/lib/AllianceModule";
 import { CANCEL } from "bdsx/common";
 import { Messages } from "./src/lib/Messages";
-import { ContainerClosePacket } from "bdsx/bds/packets";
-import { MinecraftPacketIds } from "bdsx/bds/packetids";
-import { RawPacket } from "bdsx/rawpacket";
+import { Packet } from "bdsx/bds/packet";
+import { ActorType } from "bdsx/bds/actor";
 
 let users: User[] = []
 
@@ -65,6 +66,14 @@ events.chestOpen.on(ev => {
     }
 })
 
+events.blockInteractedWith.on(e => {
+    if(!AllianceModule.allowed(e.player)) {
+        if(e.player.hasOpenContainer()) return;
+        e.player.sendMessage(Messages.notAllowedAlliance);
+        return CANCEL;
+    };
+});
+
 events.blockPlace.on(ev => {
     if(!AllianceModule.allowed(ev.player)) {
         ev.player.sendMessage(Messages.notAllowedAlliance)
@@ -86,9 +95,33 @@ events.playerInteract.on(ev => {
     }
 });
 
+const safeMobs = [
+    ActorType.Villager,
+    ActorType.VillagerV2,
+    ActorType.ZombieVillager,
+    ActorType.ZombieVillagerV2,
+    ActorType.Cow,
+    ActorType.Pig,
+    ActorType.Chicken,
+    ActorType.Fish,
+    ActorType.Cat,
+    ActorType.Parrot,
+    ActorType.Donkey,
+    ActorType.Sheep,
+    ActorType.Horse,
+    ActorType.MushroomCow
+]
+
+events.entityHurt.on(ev => {
+    const p = ev.damageSource.getDamagingEntity()
+    if(!p?.isPlayer()) return;
+    if(!safeMobs.includes(ev.entity.getEntityTypeId())) return CANCEL && p.sendMessage(Messages.notAllowedAlliance);
+})
+
 events.itemUse.on(ev => {
     if(!AllianceModule.allowed(ev.player)) {
-        if(!ev.itemStack.isPotionItem() || ev.itemStack.getItem()?.isFood()) {
+        if(ev.itemStack.getItem()?.isFood()) return;
+        if(!ev.itemStack.isPotionItem()) {
             ev.player.sendMessage(Messages.notAllowedAlliance)
             return CANCEL;
         }
