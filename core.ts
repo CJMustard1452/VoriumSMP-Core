@@ -80,9 +80,10 @@ events.chestOpen.on(ev => {
 
 events.playerSleepInBed.on(event => {
     const players = bedrockServer.serverInstance.getPlayers();
-    if(players.filter(p => p.isSleeping()) < players.filter(p => !p.isSleeping())) return;
-    bedrockServer.executeCommandOnConsole('time set day');
-    players.forEach(p => p.sendMessage(Messages.mostSleep));
+    if(players.filter(p => p.isSleeping()) >= players.filter(p => !p.isSleeping())) {
+        bedrockServer.executeCommandOnConsole('time set day');
+        players.forEach(p => p.sendMessage(Messages.mostSleep));
+    }
 });
 
 
