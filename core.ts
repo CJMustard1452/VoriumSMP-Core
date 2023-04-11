@@ -78,6 +78,14 @@ events.chestOpen.on(ev => {
     }
 })
 
+events.playerSleepInBed.on(event => {
+    const players = bedrockServer.serverInstance.getPlayers();
+    if(players.filter(p => p.isSleeping()) < players.filter(p => !p.isSleeping())) return;
+    bedrockServer.executeCommandOnConsole('time set day');
+    players.forEach(p => p.sendMessage(Messages.mostSleep));
+});
+
+
 events.blockInteractedWith.on(e => {
     if(!AllianceModule.allowed(e.player)) {
         if(e.player.hasOpenContainer()) return;
