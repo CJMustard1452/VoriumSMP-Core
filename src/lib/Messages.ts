@@ -6,6 +6,7 @@ export const Messages = {
     allianceWho: (name: string, leader: string, members: string[]) => {
         return `\n§a${name}§b\n§bLeader: §7${leader}\n§bMembers: §7${members.join(", ")}\n\n\n§o`
     },
+    rally: (name: string) => { return `§7(§3VoriumSMP§7) ${name} is rallying! Head to his position above!`},
     notAllowedAlliance: "§7(§3VoriumSMP§7) §cYou cannot do that, territory belongs to another alliance.",
     noOwnAlliance: "§7(§3VoriumSMP§7) §cYou do not own an alliance.",
     ownAlliance: "§7(§3VoriumSMP§7) §cYou already own an alliance.",

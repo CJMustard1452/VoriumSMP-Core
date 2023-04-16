@@ -13,6 +13,9 @@ import { Messages } from "./src/lib/Messages";
 import { Packet } from "bdsx/bds/packet";
 import { ActorType } from "bdsx/bds/actor";
 import { Webhook } from "webhook-discord"
+import { rallyCache } from "./src/commands/sub/rally";
+import { bedrockServer } from "bdsx/launcher";
+import { ActorDamageCause } from "bdsx/bds/actor";
 
 let users: User[] = []
 
@@ -61,6 +64,55 @@ events.serverOpen.on(async() => {
         if(!existsSync(warpPath)) openSync(warpPath, 'w');
         writeFileSync(warpPath, '{}');
     }
+
+    // setInterval(() => {
+    //     for (let [allName, player] of Object.entries(rallyCache)) {
+    //         const players = bedrockServer.level.getPlayers();
+    //         const target = players.find(p => p.getName() === player);
+    //         if (!target) {
+    //             delete rallyCache[allName];
+    //             continue;
+    //         }
+    //         const all = AllianceModule.get(allName);
+    //         if(!all) {
+    //             delete rallyCache[allName]
+    //             continue;
+    //         }
+    //         const allMembers = players.filter((p => all.members.includes(p.getName())))
+
+    //         let minDistance = Infinity;
+    //         for (let p of allMembers) {
+    //             if (player === p.getName()) {
+    //                 p.setBossBar(`§7${p.getName()} §3${Math.round(p.getPosition().x)}, ${Math.round(p.getPosition().y)}, ${Math.round(p.getPosition().z)}`, 100);
+    //                 continue;
+    //             };
+    //             const distance = Math.sqrt(
+    //                 Math.pow(p.getPosition().x - target.getPosition().x, 2) +
+    //                 Math.pow(p.getPosition().y - target.getPosition().y, 2) +
+    //                 Math.pow(p.getPosition().z - target.getPosition().z, 2)
+    //               );
+
+    //               if (distance < minDistance) {
+    //                 minDistance = distance;
+    //               }
+    //         }
+
+    //         for (let p of allMembers) {
+    //             if (player === p.getName()) {
+    //                 p.setBossBar(`§7${p.getName()} §3${Math.round(p.getPosition().x)}, ${Math.round(p.getPosition().y)}, ${Math.round(p.getPosition().z)}`, 100);
+    //                 continue;
+    //             };
+    //             const distance = Math.sqrt(
+    //                 Math.pow(p.getPosition().x - target.getPosition().x, 2) +
+    //                 Math.pow(p.getPosition().y - target.getPosition().y, 2) +
+    //                 Math.pow(p.getPosition().z - target.getPosition().z, 2)
+    //               );
+
+    //               const percent = Math.max(0, 100 - (distance / minDistance) * 100);
+    //               p.setBossBar(`§7${p.getName()} §3${Math.round(p.getPosition().x)}, ${Math.round(p.getPosition().y)}, ${Math.round(p.getPosition().z)}`, percent);
+    //             }
+    //     }
+    // }, 1500);
 });
 
 events.playerJoin.on(event => {
@@ -69,6 +121,11 @@ events.playerJoin.on(event => {
 
 events.playerLeft.on(event => {
     playerLeft(event)
+    for (let [all, player] of Object.entries(rallyCache)) {
+        if (event.player.getName() === player) {
+            delete rallyCache[all];
+        }
+    }
 })
 
 events.chestOpen.on(ev => {
@@ -91,13 +148,39 @@ events.blockPlace.on(ev => {
         ev.player.sendMessage(Messages.notAllowedAlliance)
         return CANCEL;
     }
+    const a = AllianceModule.insideWhichClaim({
+        x: ev.blockPos.x,
+        y: ev.blockPos.y,
+        z: ev.blockPos.z,
+    });
+    if (a) {
+        if(!a.members.includes(ev.player.getName())) {
+            ev.player.sendMessage(Messages.notAllowedAlliance)
+            return CANCEL;
+        }
+    }
     logs.info("Place", `${ev.player.getName()} placed a block ${ev.block.getName()} at \`${ev.blockPos.x}, ${ev.blockPos.y}, ${ev.blockPos.z}\``)
 });
+
+events.projectileHit.on((ev) => {
+
+})
 
 events.blockDestroy.on(ev => {
     if(!AllianceModule.allowed(ev.player)) {
         ev.player.sendMessage(Messages.notAllowedAlliance)
         return CANCEL;
+    }
+    const a = AllianceModule.insideWhichClaim({
+        x: ev.blockPos.x,
+        y: ev.blockPos.y,
+        z: ev.blockPos.z,
+    });
+    if (a) {
+        if(!a.members.includes(ev.player.getName())) {
+            ev.player.sendMessage(Messages.notAllowedAlliance)
+            return CANCEL;
+        }
     }
     logs.info("Destroy", `${ev.player.getName()} broke a block ${ev.itemStack.getName()} at \`${ev.blockPos.x}, ${ev.blockPos.y}, ${ev.blockPos.z}\``)
 });
@@ -128,22 +211,33 @@ const safeMobs = [
     ActorType.MushroomCow
 ]
 
-events.entityHurt.on(ev => {
-    const p = ev.damageSource.getDamagingEntity()
+events.playerAttack.on(ev => {
+    const p = ev.player
     if(!p?.isPlayer()) return;
     if(!AllianceModule.allowed(p)) {
-        if(!safeMobs.includes(ev.entity.getEntityTypeId())) {
+        if(safeMobs.includes(ev.victim.getEntityTypeId())) {
             p.sendMessage(Messages.notAllowedAlliance)
             return CANCEL;
         };
     }
-    logs.info("Hurt", `${p.getName()} used item ${ev.entity.getIdentifier()} at \`${p.getPosition().x}, ${p.getPosition().y}, ${p.getPosition().z}\``)
+    logs.info("Attack", `${p.getName()} used item ${ev.victim.getIdentifier()} at \`${p.getPosition().x}, ${p.getPosition().y}, ${p.getPosition().z}\``)
+})
+
+events.entityHurt.on(ev => {
+    if(AllianceModule.insideClaim(ev.entity.getPosition())) {
+        const cause = ev.damageSource.cause;
+        if(cause === ActorDamageCause.Projectile || cause === ActorDamageCause.BlockExplosion || cause === ActorDamageCause.EntityExplosion) {
+            if(safeMobs.includes(ev.entity.getEntityTypeId())) {
+                return CANCEL;
+            };
+        }
+    }
 })
 
 events.itemUse.on(ev => {
     if(!AllianceModule.allowed(ev.player)) {
         if(ev.itemStack.getItem()?.isFood()) return;
-        if(!ev.itemStack.isPotionItem()) {
+        if(!ev.itemStack.isPotionItem() && !ev.itemStack.isDamageableItem()) {
             ev.player.sendMessage(Messages.notAllowedAlliance)
             return CANCEL;
         }
@@ -169,3 +263,30 @@ events.splashPotionHit.on(ev => {
         return CANCEL;
     }
 });
+
+
+events.levelExplode.on(ev => {
+    if(AllianceModule.insideClaim({
+        x: ev.position.x,
+        y: ev.position.y,
+        z: ev.position.z
+    }) || AllianceModule.insideClaim({
+        x: ev.position.x + 5,
+        y: ev.position.y + 5,
+        z: ev.position.z + 5
+    }) || AllianceModule.insideClaim({
+        x: ev.position.x - 5,
+        y: ev.position.y - 5,
+        z: ev.position.z - 5
+    }) || AllianceModule.insideClaim({
+        x: ev.position.x + 5,
+        y: ev.position.y - 5,
+        z: ev.position.z - 5,
+    }) || AllianceModule.insideClaim({
+        x: ev.position.x - 5,
+        y: ev.position.y + 5,
+        z: ev.position.z + 5,
+    })) {
+        return CANCEL;
+    }
+})

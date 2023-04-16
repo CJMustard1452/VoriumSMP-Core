@@ -13,6 +13,7 @@ import who from './sub/who';
 import disband from './sub/disband';
 import leave from './sub/leave';
 import claim from './sub/claim';
+import rally from './sub/rally';
 
 export const cache: { [name: string]: string[] } = {}
 
@@ -49,3 +50,7 @@ command.register("alliance", "§cAccess to alliance sub-commands.")
         const user = new User((origin.getEntity() as ServerPlayer))!
         claim(user, params)
     }, { option: command.enum("option.claim", "claim"), claimOption: command.enum("claimOption", "start", "complete") })
+    .overload((params, origin) => {
+        const user = new User((origin.getEntity() as ServerPlayer))!
+        //rally(user, params)
+    }, { option: command.enum("option.rally", "rally"), alliance: CxxString })
